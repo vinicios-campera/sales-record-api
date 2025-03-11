@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  ambev.developerevaluation.webapi:
+    profiles:
+      - disabled
+  
+  ambev.developerevaluation.database:
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: DeveloperEvaluation
+  
+  ambev.developerevaluation.nosql:
+    ports:
+      - "27017:27017"
+
+  ambev.developerevaluation.cache:
+    ports:
+      - "6379:6379"
