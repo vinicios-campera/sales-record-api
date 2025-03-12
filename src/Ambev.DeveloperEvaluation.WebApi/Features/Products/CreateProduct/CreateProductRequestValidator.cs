@@ -6,11 +6,11 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct
     {
         public CreateProductRequestValidator()
         {
-            RuleFor(user => user.Title).NotEmpty().Length(3, 100);
-            RuleFor(user => user.Price).GreaterThan(0).PrecisionScale(18, 2, true);
-            RuleFor(user => user.Description).NotEmpty().Length(3, 150);
-            RuleFor(user => user.Category).NotNull();
-            RuleFor(user => user.Image).NotEmpty().Must(BeAValidUrl).WithMessage("Invalid image url");
+            RuleFor(x => x.Title).NotEmpty().Length(3, 100);
+            RuleFor(x => x.Price).GreaterThan(0).PrecisionScale(18, 2, true);
+            RuleFor(x => x.Description).NotEmpty().Length(3, 150);
+            RuleFor(x => x.Category).NotNull();
+            RuleFor(x => x.Image).NotEmpty().Must(BeAValidUrl).WithMessage("Invalid image url");
         }
 
         private bool BeAValidUrl(string url)
