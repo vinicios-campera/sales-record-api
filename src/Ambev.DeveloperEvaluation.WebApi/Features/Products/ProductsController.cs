@@ -82,10 +82,10 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products
             });
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         [ProducesResponseType(typeof(ApiResponseWithData<UpdateProductResponse>), StatusCodes.Status202Accepted)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateProduct([FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateProduct([FromRoute] Guid id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
         {
             var validator = new UpdateProductRequestValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -94,6 +94,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products
                 return BadRequest(validationResult.Errors);
 
             var command = mapper.Map<UpdateProductCommand>(request);
+            command.Id = id;
             var response = await mediator.Send(command, cancellationToken);
 
             return Accepted(string.Empty, new ApiResponseWithData<UpdateProductResponse>
