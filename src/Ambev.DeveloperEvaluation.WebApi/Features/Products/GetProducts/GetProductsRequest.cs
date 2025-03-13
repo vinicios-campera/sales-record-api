@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProducts
 {
-    public class GetProductsRequest : PaginatedRequestBase
+    public class GetProductsRequest : CommonPaginatedRequest
     {
         [FromQuery(Name = "title")]
         public string? Title { get; set; }

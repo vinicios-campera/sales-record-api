@@ -50,7 +50,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products
         [HttpGet("category/{category}")]
         [ProducesResponseType(typeof(PaginatedList<GetProductResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetProductsByCategory(PaginatedRequestBase request, [FromRoute] ProductCategory category, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetProductsByCategory(CommonPaginatedRequest request, [FromRoute] ProductCategory category, CancellationToken cancellationToken)
         {
             var command = mapper.Map<GetProductsCommand>(request);
             command.Category = category;

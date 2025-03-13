@@ -10,7 +10,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Mappings.Products
         public GetProductsRequestProfile()
         {
             CreateMap<GetProductsRequest, GetProductsCommand>();
-            CreateMap<PaginatedRequestBase, GetProductsCommand>();
+            CreateMap<CommonPaginatedRequest, GetProductsCommand>();
         }
     }
 }

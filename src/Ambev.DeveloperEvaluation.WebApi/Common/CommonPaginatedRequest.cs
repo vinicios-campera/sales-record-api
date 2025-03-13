@@ -2,7 +2,7 @@
 
 namespace Ambev.DeveloperEvaluation.WebApi.Common
 {
-    public class PaginatedRequestBase
+    public class CommonPaginatedRequest
     {
         [FromQuery(Name = "_page")]
         public int Page { get; set; } = 1;
