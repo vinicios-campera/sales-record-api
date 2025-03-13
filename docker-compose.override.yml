@@ -13,7 +13,9 @@ services:
   
   ambev.developerevaluation.nosql:
     ports:
-      - "27017:27017"
+      - "27017:27017"   
+    environment:
+        MONGO_INITDB_ROOT_PASSWORD: evAluAt10n
 
   ambev.developerevaluation.cache:
     ports:

@@ -6,7 +6,7 @@ public interface ICartRepository
 {
     Task<Cart> CreateAsync(Cart cart, CancellationToken cancellationToken = default);
 
-    Task<Cart> UpdateAsync(Cart product, CancellationToken cancellationToken = default);
+    Task<Cart> UpdateAsync(Cart cart, CancellationToken cancellationToken = default);
 
     Task<Cart?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 

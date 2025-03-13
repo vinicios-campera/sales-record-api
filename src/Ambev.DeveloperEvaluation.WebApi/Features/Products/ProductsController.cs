@@ -13,11 +13,13 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProducts;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.UpdateProduct;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Products
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class ProductsController(IMediator mediator, IMapper mapper) : BaseController
     {
