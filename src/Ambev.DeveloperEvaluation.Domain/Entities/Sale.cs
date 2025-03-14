@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Attributes;
 using Ambev.DeveloperEvaluation.Domain.Extensions;
+using Ambev.DeveloperEvaluation.Domain.Specifications;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -12,21 +13,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public Guid Id { get; set; }
 
         public int Number { get; private set; }
-        public void SetNumber(int number)
-            => Number = number;
-
         public DateTime Date { get; set; } = DateTime.UtcNow;
         public string Customer { get; set; } = string.Empty;
         public decimal TotalAmount { get; private set; }
         public decimal TotalDiscount { get; private set; }
         public decimal TotalSaleAmount { get; private set; }
-
-        public void UpdateValuesAfterDiscount()
-        {
-            TotalAmount = Products.Sum(x => x.Total).Round();
-            TotalDiscount = Products.Sum(x => x.Discount).Round();
-            TotalSaleAmount = Products.Sum(x => x.SubTotal).Round();
-        }
 
         public string Branch { get; set; } = string.Empty;
 
@@ -34,6 +25,19 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public Status Status { get; set; } = Status.Active;
 
         public IEnumerable<SaleProduct> Products { get; set; } = [];
+
+        public void SetNumber(int number)
+            => Number = number;
+
+        public void CalculateDiscount()
+        {
+            foreach (var item in Products)
+                item.CalculateDiscount();
+
+            TotalAmount = Products.Sum(x => x.Total).Round();
+            TotalDiscount = Products.Sum(x => x.Discount).Round();
+            TotalSaleAmount = Products.Sum(x => x.SubTotal).Round();
+        }
     }
 
     public class SaleProduct
@@ -48,7 +52,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public decimal Quantity { get; set; }
 
         public decimal Price { get; set; }
-        public decimal Total { get; set; }
+        public decimal Total { get; private set; }
         public decimal Discount { get; private set; }
         public decimal SubTotal { get; private set; }
 
@@ -58,14 +62,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public void SetTotal()
             => Total = (Quantity * Price).Round();
 
-        public void SetDiscount(decimal discount)
+        public void AddDiscount(decimal discount)
         {
             Discount = discount.Round();
-            SetSubTotal();
+            SubTotal = (Total - Discount).Round();
         }
-
-        public void SetSubTotal()
-            => SubTotal = (Total - Discount).Round();
     }
 
     public enum Status

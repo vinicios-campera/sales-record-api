@@ -23,9 +23,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 var command = new GetProductCommand { Id = item.ProductId };
                 var response = await mediator.Send(command);
                 item.Description = response.Description;
-                item.CalculateDiscount();
             }
-            sale.UpdateValuesAfterDiscount();
+
+            sale.CalculateDiscount();
 
             var lastSaleNumber = await saleRepository.GetCurrentNumber(cancellationToken);
             sale.SetNumber(lastSaleNumber);

@@ -23,12 +23,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
                 var command = new GetProductCommand { Id = item.ProductId };
                 var response = await mediator.Send(command);
                 item.Description = response.Description;
-                item.CalculateDiscount();
             }
-            sale.UpdateValuesAfterDiscount();
 
-            var lastSaleNumber = await saleRepository.GetCurrentNumber(cancellationToken);
-            sale.SetNumber(lastSaleNumber);
+            sale.CalculateDiscount();
 
             await saleRepository.UpdateAsync(sale, cancellationToken);
             await mediator.Publish(new SaleUpdateEvent(sale.Id, sale.Customer, sale.TotalAmount), cancellationToken);

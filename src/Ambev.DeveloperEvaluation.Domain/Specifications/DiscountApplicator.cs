@@ -1,16 +1,16 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Attributes;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 
-namespace Ambev.DeveloperEvaluation.Application.Sales
+namespace Ambev.DeveloperEvaluation.Domain.Specifications
 {
     public static class DiscountApplicator
     {
-        public static void CalculateDiscount(this SaleProduct saleProduct)
+        internal static void CalculateDiscount(this SaleProduct saleProduct)
         {
             var discountPercentage = saleProduct.GetPercentageDiscount();
             saleProduct.SetTotal();
             var discount = saleProduct.Total * discountPercentage;
-            saleProduct.SetDiscount(discount);
+            saleProduct.AddDiscount(discount);
         }
 
         private static decimal GetPercentageDiscount(this SaleProduct saleProduct)
