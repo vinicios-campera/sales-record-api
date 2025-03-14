@@ -2,12 +2,7 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.DeleteProduct;
 
-public record DeleteProductCommand : IRequest<DeleteProductResponse>
+public record DeleteProductCommand : IRequest
 {
-    public Guid Id { get; }
-
-    public DeleteProductCommand(Guid id)
-    {
-        Id = id;
-    }
+    public Guid Id { get; set; }
 }

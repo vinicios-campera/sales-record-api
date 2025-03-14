@@ -35,7 +35,7 @@ public class CartRepository(DefaultContext context) : ICartRepository
         return true;
     }
 
-    public async Task<(IEnumerable<Cart?>, int)> FilterAsync(int page, int size, string? order, CancellationToken cancellationToken = default)
+    public async Task<(IEnumerable<Cart?>, int)> FilterAsync(Guid userId, int page, int size, string? order, CancellationToken cancellationToken = default)
     {
         var query = context.Carts.AsQueryable();
 
@@ -55,7 +55,7 @@ public class CartRepository(DefaultContext context) : ICartRepository
             }
         }
 
-        return (await query.Skip((page - 1) * size).Take(size).Include(x => x.CartProducts).ToListAsync(), await query.CountAsync());
+        return (await query.Skip((page - 1) * size).Take(size).Include(x => x.CartProducts).Where(x => x.UserId == userId).ToListAsync(), await query.CountAsync());
     }
 
     private IQueryable<Cart> ApplyOrdering(IQueryable<Cart> query, string propertyName, bool descending, bool firstOrder)

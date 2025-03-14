@@ -1,14 +1,21 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Application.Products.CreateCart;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using AutoMapper;
+using FluentValidation;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Carts.CreateCart
 {
-    public class CreateCartHandler(IMapper mapper, IUserRepository userRepository, IProductRepository productRepository, ICartRepository cartRepository) : IRequestHandler<CreateCartCommand, CreateCartResult>
+    public class CreateCartHandler(IUserRepository userRepository, IProductRepository productRepository, ICartRepository cartRepository) : IRequestHandler<CreateCartCommand, Guid>
     {
-        public async Task<CreateCartResult> Handle(CreateCartCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreateCartCommand request, CancellationToken cancellationToken)
         {
+            var validator = new CreateCartCommandValidator();
+            var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var user = await userRepository.GetByIdAsync(request.UserId);
             var cartProducts = new List<CartProduct>();
             var cart = new Cart { User = user! };
@@ -24,8 +31,7 @@ namespace Ambev.DeveloperEvaluation.Application.Carts.CreateCart
 
             cart.CartProducts = cartProducts;
             var createdCart = await cartRepository.CreateAsync(cart);
-            var result = mapper.Map<CreateCartResult>(createdCart);
-            return result;
+            return createdCart.Id;
         }
     }
 }

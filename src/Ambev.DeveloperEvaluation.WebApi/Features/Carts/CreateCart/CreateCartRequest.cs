@@ -2,10 +2,10 @@
 {
     public class CreateCartRequest
     {
-        public List<CreateCartProduct> Products { get; set; } = [];
+        public List<CreateCartProductRequest> Products { get; set; } = [];
     }
 
-    public class CreateCartProduct
+    public class CreateCartProductRequest
     {
         public Guid ProductId { get; set; }
         public decimal Quantity { get; set; }

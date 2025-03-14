@@ -5,9 +5,9 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Carts.UpdateCart
 {
-    public class UpdateCartHandler(ICartRepository cartRepository, IMapper mapper) : IRequestHandler<UpdateCartCommand, UpdateCartResult>
+    public class UpdateCartHandler(ICartRepository cartRepository, IMapper mapper) : IRequestHandler<UpdateCartCommand, Guid>
     {
-        public async Task<UpdateCartResult> Handle(UpdateCartCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(UpdateCartCommand request, CancellationToken cancellationToken)
         {
             var validator = new UpdateCartCommandValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -22,8 +22,7 @@ namespace Ambev.DeveloperEvaluation.Application.Carts.UpdateCart
             var cart = mapper.Map(request, existingCart);
 
             var updatedProduct = await cartRepository.UpdateAsync(cart, cancellationToken);
-            var result = mapper.Map<UpdateCartResult>(updatedProduct);
-            return result;
+            return updatedProduct.Id;
         }
     }
 }

@@ -4,9 +4,9 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Carts.DeleteCart;
 
-public class DeleteCartHandler(ICartRepository cartRepository) : IRequestHandler<DeleteCartCommand, DeleteCartResponse>
+public class DeleteCartHandler(ICartRepository cartRepository) : IRequestHandler<DeleteCartCommand>
 {
-    public async Task<DeleteCartResponse> Handle(DeleteCartCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteCartCommand request, CancellationToken cancellationToken)
     {
         var validator = new DeleteCartValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -17,7 +17,5 @@ public class DeleteCartHandler(ICartRepository cartRepository) : IRequestHandler
         var success = await cartRepository.DeleteAsync(request.Id, cancellationToken);
         if (!success)
             throw new KeyNotFoundException($"Cart with ID {request.Id} not found");
-
-        return new DeleteCartResponse { Success = true };
     }
 }

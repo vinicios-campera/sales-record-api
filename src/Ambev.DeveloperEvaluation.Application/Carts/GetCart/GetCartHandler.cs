@@ -16,7 +16,7 @@ public class GetCartHandler(ICartRepository cartRepository, IMapper mapper) : IR
             throw new ValidationException(validationResult.Errors);
 
         var cart = await cartRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (cart == null)
+        if (cart == null || cart.UserId != request.UserId)
             throw new KeyNotFoundException($"Cart with ID {request.Id} not found");
 
         return mapper.Map<GetCartResult>(cart);

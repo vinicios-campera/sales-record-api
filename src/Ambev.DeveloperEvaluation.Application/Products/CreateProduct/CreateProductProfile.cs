@@ -8,7 +8,6 @@ namespace Ambev.DeveloperEvaluation.Application.Products.CreateProduct
         public CreateProductProfile()
         {
             CreateMap<CreateProductCommand, Product>();
-            CreateMap<Product, CreateProductResult>();
         }
     }
 }

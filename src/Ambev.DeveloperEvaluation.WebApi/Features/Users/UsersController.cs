@@ -54,8 +54,7 @@ public class UsersController : BaseController
 
         return Created(string.Empty, new ApiResponseWithData<CreateUserResponse>
         {
-            Success = true,
-            Message = "User created successfully",
+            Detail = "User created successfully",
             Data = _mapper.Map<CreateUserResponse>(response)
         });
     }
@@ -82,10 +81,9 @@ public class UsersController : BaseController
         var command = _mapper.Map<GetUserCommand>(request.Id);
         var response = await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponseWithData<GetUserResponse>
+        return Okay(new ApiResponseWithData<GetUserResponse>
         {
-            Success = true,
-            Message = "User retrieved successfully",
+            Detail = "User retrieved successfully",
             Data = _mapper.Map<GetUserResponse>(response)
         });
     }
@@ -112,10 +110,9 @@ public class UsersController : BaseController
         var command = _mapper.Map<DeleteUserCommand>(request.Id);
         await _mediator.Send(command, cancellationToken);
 
-        return Ok(new ApiResponse
+        return Okay(new ApiResponse
         {
-            Success = true,
-            Message = "User deleted successfully"
+            Detail = "User deleted successfully"
         });
     }
 }

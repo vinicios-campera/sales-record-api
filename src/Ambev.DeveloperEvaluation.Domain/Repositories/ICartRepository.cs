@@ -12,5 +12,5 @@ public interface ICartRepository
 
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
-    Task<(IEnumerable<Cart?>, int)> FilterAsync(int page, int size, string? order, CancellationToken cancellationToken = default);
+    Task<(IEnumerable<Cart?>, int)> FilterAsync(Guid userId, int page, int size, string? order, CancellationToken cancellationToken = default);
 }

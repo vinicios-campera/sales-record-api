@@ -5,9 +5,9 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.UpdateProduct
 {
-    public class UpdateProductHandler(IProductRepository productRepository, IMapper mapper) : IRequestHandler<UpdateProductCommand, UpdateProductResult>
+    public class UpdateProductHandler(IProductRepository productRepository, IMapper mapper) : IRequestHandler<UpdateProductCommand, Guid>
     {
-        public async Task<UpdateProductResult> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
         {
             var validator = new UpdateProductCommandValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -22,8 +22,7 @@ namespace Ambev.DeveloperEvaluation.Application.Products.UpdateProduct
             var product = mapper.Map(request, existingProduct);
 
             var updatedProduct = await productRepository.UpdateAsync(product, cancellationToken);
-            var result = mapper.Map<UpdateProductResult>(updatedProduct);
-            return result;
+            return updatedProduct.Id;
         }
     }
 }

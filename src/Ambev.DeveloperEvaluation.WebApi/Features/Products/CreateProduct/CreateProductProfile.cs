@@ -7,7 +7,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct
     {
         public CreateProductProfile()
         {
-            CreateMap<CreateProductResult, CreateProductResponse>();
+            CreateMap<CreateProductRequest, CreateProductCommand>();
+            CreateMap<CreateProductRequest, CreateProductResponse>();
         }
     }
 }

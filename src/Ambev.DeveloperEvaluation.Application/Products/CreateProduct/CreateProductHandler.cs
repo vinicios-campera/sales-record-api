@@ -6,9 +6,9 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.CreateProduct
 {
-    public class CreateProductHandler(IMapper mapper, IProductRepository productRepository) : IRequestHandler<CreateProductCommand, CreateProductResult>
+    public class CreateProductHandler(IMapper mapper, IProductRepository productRepository) : IRequestHandler<CreateProductCommand, Guid>
     {
-        public async Task<CreateProductResult> Handle(CreateProductCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
         {
             var validator = new CreateProductCommandValidator();
             var validationResult = await validator.ValidateAsync(request, cancellationToken);
@@ -17,10 +17,8 @@ namespace Ambev.DeveloperEvaluation.Application.Products.CreateProduct
                 throw new ValidationException(validationResult.Errors);
 
             var product = mapper.Map<Product>(request);
-
             var createdProduct = await productRepository.CreateAsync(product, cancellationToken);
-            var result = mapper.Map<CreateProductResult>(createdProduct);
-            return result;
+            return createdProduct.Id;
         }
     }
 }

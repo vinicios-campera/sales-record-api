@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Products.CreateProduct;
+﻿using System.ComponentModel.DataAnnotations;
+using Ambev.DeveloperEvaluation.Application.Products.CreateProduct;
 using Ambev.DeveloperEvaluation.Application.Products.DeleteProduct;
 using Ambev.DeveloperEvaluation.Application.Products.GetProduct;
 using Ambev.DeveloperEvaluation.Application.Products.GetProductCategories;
@@ -7,9 +8,8 @@ using Ambev.DeveloperEvaluation.Application.Products.UpdateProduct;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.CreateProduct;
-using Ambev.DeveloperEvaluation.WebApi.Features.Products.DeleteProduct;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProduct;
-using Ambev.DeveloperEvaluation.WebApi.Features.Products.GetProducts;
+using Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProducts;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.UpdateProduct;
 using AutoMapper;
 using MediatR;
@@ -23,135 +23,127 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Products
     [Route("api/[controller]")]
     public class ProductsController(IMediator mediator, IMapper mapper) : BaseController
     {
+        /// <summary>
+        /// Adicionar um produto
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [ProducesResponseType(typeof(CreateProductResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
+        {
+            var command = mapper.Map<CreateProductCommand>(request);
+            var response = mapper.Map<CreateProductResponse>(request);
+            response.Id = await mediator.Send(command, cancellationToken);
+            return Created(GetUrl($"/api/products/{response.Id}"), response);
+        }
+
+        /// <summary>
+        /// Obter um produto pelo ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(GetProductResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProduct([FromRoute][Required] Guid id, CancellationToken cancellationToken)
+        {
+            var command = new GetProductCommand { Id = id };
+            var result = await mediator.Send(command, cancellationToken);
+            var response = mapper.Map<GetProductResponse>(result);
+            return Ok(response);
+        }
+
+        /// <summary>
+        /// Obter produtos paginado, ordenado e filtrado
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(PaginatedList<GetProductResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PageResponse<GetProductResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProducts(GetProductsRequest request, CancellationToken cancellationToken)
         {
             var command = mapper.Map<GetProductsCommand>(request);
-            var response = await mediator.Send(command, cancellationToken);
-            var data = mapper.Map<List<GetProductResponse>>(response.Items);
-            var result = new PaginatedList<GetProductResponse>(data, response.TotalItems, request.Page, request.Size);
-            return OkPaginated(result);
+            var result = await mediator.Send(command, cancellationToken);
+            var items = mapper.Map<List<GetProductResponse>>(result.Items);
+            var response = new PageResponse<GetProductResponse>(items, result.TotalItems, request.Page, request.Size);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Obter categorias de produtos cadastrados
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("categories")]
-        [ProducesResponseType(typeof(ApiResponseWithData<IEnumerable<string>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductsCategories(CancellationToken cancellationToken)
         {
-            var response = await mediator.Send(new GetProductsCategoriesCommand(), cancellationToken);
-            return Ok(new ApiResponseWithData<IEnumerable<string>>
-            {
-                Success = true,
-                Message = "Product categories retrieved successfully",
-                Data = response
-            });
+            var result = await mediator.Send(new GetProductsCategoriesCommand(), cancellationToken);
+            return Ok(result);
         }
 
+        /// <summary>
+        /// Obter produtos de uma categoria
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="category"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("category/{category}")]
-        [ProducesResponseType(typeof(PaginatedList<GetProductResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PageResponse<GetProductResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetProductsByCategory(CommonPaginatedRequest request, [FromRoute] ProductCategory category, CancellationToken cancellationToken)
         {
             var command = mapper.Map<GetProductsCommand>(request);
             command.Category = category;
-            var response = await mediator.Send(command, cancellationToken);
-            var data = mapper.Map<List<GetProductResponse>>(response.Items);
-            var result = new PaginatedList<GetProductResponse>(data, response.TotalItems, request.Page, request.Size);
-            return OkPaginated(result);
+            var result = await mediator.Send(command, cancellationToken);
+            var items = mapper.Map<List<GetProductResponse>>(result.Items);
+            var response = new PageResponse<GetProductResponse>(items, result.TotalItems, request.Page, request.Size);
+            return Ok(response);
         }
 
-        [HttpPost]
-        [ProducesResponseType(typeof(ApiResponseWithData<CreateProductResponse>), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request, CancellationToken cancellationToken)
-        {
-            var validator = new CreateProductRequestValidator();
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
-            var command = mapper.Map<CreateProductCommand>(request);
-            var response = await mediator.Send(command, cancellationToken);
-
-            return Created(string.Empty, new ApiResponseWithData<CreateProductResponse>
-            {
-                Success = true,
-                Message = "Product created successfully",
-                Data = mapper.Map<CreateProductResponse>(response)
-            });
-        }
-
+        /// <summary>
+        /// Editar um produto
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(ApiResponseWithData<UpdateProductResponse>), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(UpdateProductResponse), StatusCodes.Status202Accepted)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateProduct([FromRoute] Guid id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateProduct([FromRoute][Required] Guid id, [FromBody] UpdateProductRequest request, CancellationToken cancellationToken)
         {
-            var validator = new UpdateProductRequestValidator();
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
             var command = mapper.Map<UpdateProductCommand>(request);
             command.Id = id;
-            var response = await mediator.Send(command, cancellationToken);
-
-            return Accepted(string.Empty, new ApiResponseWithData<UpdateProductResponse>
-            {
-                Success = true,
-                Message = "Product updated successfully",
-                Data = mapper.Map<UpdateProductResponse>(response)
-            });
+            var response = mapper.Map<UpdateProductResponse>(request);
+            response.Id = await mediator.Send(command, cancellationToken);
+            return Accepted(GetUrl($"/api/products/{response.Id}"), response);
         }
 
-        [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ApiResponseWithData<GetProductResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetProduct([FromRoute] Guid id, CancellationToken cancellationToken)
-        {
-            var request = new GetProductRequest { Id = id };
-            var validator = new GetProductRequestValidator();
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
-            var command = mapper.Map<GetProductCommand>(request.Id);
-            var response = await mediator.Send(command, cancellationToken);
-
-            return Ok(new ApiResponseWithData<GetProductResponse>
-            {
-                Success = true,
-                Message = "Product retrieved successfully",
-                Data = mapper.Map<GetProductResponse>(response)
-            });
-        }
-
+        /// <summary>
+        /// Deletar um produto
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteProduct([FromRoute] Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> DeleteProduct([FromRoute][Required] Guid id, CancellationToken cancellationToken)
         {
-            var request = new DeleteProductRequest { Id = id };
-            var validator = new DeleteProductRequestValidator();
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
-            var command = mapper.Map<DeleteProductCommand>(request.Id);
+            var command = new DeleteProductCommand { Id = id };
             await mediator.Send(command, cancellationToken);
-
-            return Ok(new ApiResponse
-            {
-                Success = true,
-                Message = "Product deleted successfully"
-            });
+            return Ok(new MessageResponse { Message = "Deleted successfully" });
         }
     }
 }

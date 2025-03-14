@@ -7,10 +7,10 @@
 
         public DateTime Date { get; set; }
 
-        public IEnumerable<UpdateProductResponse> Products { get; set; } = [];
+        public IEnumerable<UpdateProductCartResponse> Products { get; set; } = [];
     }
 
-    public class UpdateProductResponse
+    public class UpdateProductCartResponse
     {
         public Guid ProductId { get; set; }
 

@@ -2,7 +2,7 @@
 
 namespace Ambev.DeveloperEvaluation.Application.Carts.UpdateCart
 {
-    public class UpdateCartCommand : IRequest<UpdateCartResult>
+    public class UpdateCartCommand : IRequest<Guid>
     {
         public Guid Id { get; set; }
         public List<UpdateCartProduct> Products { get; set; } = [];

@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.Application.Carts.ListCarts
     {
         public async Task<GetCartsResult> Handle(GetCartsCommand request, CancellationToken cancellationToken)
         {
-            var data = await cartRepository.FilterAsync(request.Page, request.Size, request.Order, cancellationToken);
+            var data = await cartRepository.FilterAsync(request.UserId, request.Page, request.Size, request.Order, cancellationToken);
             var result = new GetCartsResult { TotalItems = data.Item2, Items = mapper.Map<IEnumerable<GetCartResult>>(data.Item1) };
             return result;
         }
