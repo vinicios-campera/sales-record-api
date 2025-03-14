@@ -3,7 +3,7 @@ using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.ListProducts;
 using AutoMapper;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Mappings.Products
+namespace Ambev.DeveloperEvaluation.WebApi.Mappings.Product
 {
     public class GetProductsRequestProfile : Profile
     {

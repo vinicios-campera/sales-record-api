@@ -38,7 +38,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
     public class SaleProduct
     {
-        public string Product { get; set; } = string.Empty;
+        [BsonRepresentation(BsonType.String)]
+        public Guid ProductId { get; set; }
+
+        public string Description { get; set; } = string.Empty;
 
         [Discount(4, 9, 0.10)]
         [Discount(10, 20, 0.20)]

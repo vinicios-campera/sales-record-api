@@ -13,7 +13,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 
         public class UpdateSaleCommandProducts
         {
-            public string Product { get; set; } = string.Empty;
+            public Guid ProductId { get; set; }
             public decimal Quantity { get; set; }
             public decimal Price { get; set; }
         }

@@ -79,24 +79,60 @@ Antes de rodar o projeto, certifique-se de ter instalado:
   ### Os demais recursos, podem ser explorados na documentação
 
   - api/Auth
-  - api/Cart
+  - api/Carts
   - api/Products
-  - api/Sale
+  - api/Sales
   - api/Users
   - **IMPORTANTE: Lembre-se se autenticar no Swagger utilizando o token obtido no passo anterior**
 
 ## 📌 Estrutura da aplicação
 
-- Os recursos denominados Carrinho (**Cart**), Produtos (**Products**) e Usuários (**Users**) são mantidos na base de dados **PostgreSQL**
-- O recurso Vendas (**Sale**) é mantido no **MongoDb**
+- Os recursos denominados Carrinho (**Carts**), Produtos (**Products**) e Usuários (**Users**) são mantidos na base de dados **PostgreSQL**
+- O recurso Vendas (**Sales**) é mantido no **MongoDb**
 
 ## 📌 Considerações finais
 
 - Antes de iniciar o desenvolvimento, precisei fazer algumas alterações no projeto existente (template), tais como:
 
-1. Precisei alterar a ConnectionString **DefaultConnection** no arquivo **appsettings.json** da API para o funcionamento correto no PostgreSQL. Acredito que estava configurado para SqlServer, pois o usuário estava definido como 'sa'
-2. Sobrescrevi algumas configurações do **docker-compose.yml**, tais como:
-   - Portas de acesso (no Windows estava subindo aleatóriamente)
-   - Nome da base de dados inicial do container Postgres
-   - Desabilitado o container da Web Api
-3. Tive que excluir as **Migrations** existentes no projeto **Ambev.DeveloperEvaluation.ORM**, pois as mesmas não estavam subindo, dizia que as migrations já havia sido aplicadas no meu banco de dados, porem a base ainda continuava sem as tabelas necessárias.
+  1. Precisei alterar a ConnectionString **DefaultConnection** no arquivo **appsettings.json** da API para o funcionamento correto no PostgreSQL. Acredito que estava configurado para SqlServer, pois o usuário estava definido como 'sa'
+  2. Sobrescrevi algumas configurações do **docker-compose.yml**, tais como:
+
+  - Portas de acesso (no Windows estava subindo aleatóriamente)
+  - Nome da base de dados inicial do container Postgres
+  - Desabilitado o container da Web Api
+  - Adicionando volumes persistentes ao PostgreSQL, MongoDb e Redis
+
+  3. Tive que excluir as **Migrations** existentes no projeto **Ambev.DeveloperEvaluation.ORM**, pois as mesmas não estavam subindo, dizia que as migrations já havia sido aplicadas no meu banco de dados, porem a base ainda continuava sem as tabelas necessárias.
+
+- Percebi que existia uma instancia do Redis (cache) no docker-compose.yml. Como não foi citado utiliza-lo, não implementei. Mas se for necessário, basta inclui-lo no projeto para uso
+
+  ```bash
+  dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
+  ```
+
+  ```csharp
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = "localhost:6379";
+        options.InstanceName = "MyApp_";
+    });
+  ```
+
+  ```csharp
+   public class Service(IDistributedCache cache){
+
+     public void RemoveAndAddCache(string value){
+       await cache.RemoveAsync("chave");
+       await cache.SetAsync("chave", value, new DistributedCacheEntryOptions
+       {
+           SlidingExpiration = TimeSpan.FromMinutes(5) /
+       });
+     }
+
+     public string GetFromCache(){
+      var data = await cache.GetStringAsync("chave");
+      return data;
+     }
+
+   }
+  ```

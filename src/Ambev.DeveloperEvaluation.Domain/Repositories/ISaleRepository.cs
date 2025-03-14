@@ -11,5 +11,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Repositories
         Task CreateAsync(Sale sale, CancellationToken cancellationToken = default);
 
         Task<int> GetCurrentNumber(CancellationToken cancellationToken = default);
+
+        Task<(IEnumerable<Sale?>, int)> FilterAsync(int page, int size, string? order, CancellationToken cancellationToken = default);
     }
 }

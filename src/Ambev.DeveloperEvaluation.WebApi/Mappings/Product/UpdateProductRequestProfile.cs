@@ -2,7 +2,7 @@
 using Ambev.DeveloperEvaluation.WebApi.Features.Products.UpdateProduct;
 using AutoMapper;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Mappings.Products
+namespace Ambev.DeveloperEvaluation.WebApi.Mappings.Product
 {
     public class UpdateProductRequestProfile : Profile
     {

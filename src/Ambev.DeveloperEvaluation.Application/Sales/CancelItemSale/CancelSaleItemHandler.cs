@@ -17,7 +17,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelItemSale
             var updated = false;
             foreach (var item in sale.Products)
             {
-                if (item.Product.Trim() == request.Product.Trim() && item.Status == Status.Active)
+                if (item.ProductId == request.ProductId && item.Status == Status.Active)
                 {
                     item.Status = Status.Canceled;
                     updated = true;
@@ -27,7 +27,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelItemSale
             if (updated)
             {
                 await saleRepository.UpdateAsync(sale);
-                await mediator.Publish(new SaleItemCanceledEvent(sale.Id, request.Product), cancellationToken);
+                await mediator.Publish(new SaleItemCanceledEvent(sale.Id, request.ProductId), cancellationToken);
             }
 
             return updated;

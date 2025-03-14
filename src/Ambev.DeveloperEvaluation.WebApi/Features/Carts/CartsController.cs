@@ -59,7 +59,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Carts
         }
 
         /// <summary>
-        /// Ovter carrinhos paginado e ordenado
+        /// Obter carrinhos paginado e ordenado
         /// </summary>
         /// <param name="request"></param>
         /// <param name="cancellationToken"></param>

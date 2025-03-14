@@ -6,12 +6,12 @@ namespace Ambev.DeveloperEvaluation.Domain.Events
     {
         public Guid SaleId { get; }
 
-        public string Product { get; }
+        public Guid ProductId { get; set; }
 
-        public SaleItemCanceledEvent(Guid saleId, string product)
+        public SaleItemCanceledEvent(Guid saleId,  Guid productId)
         {
             SaleId = saleId;
-            Product = product;
+            ProductId = productId;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Events;
+﻿using Ambev.DeveloperEvaluation.Application.Products.GetProduct;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using FluentValidation;
@@ -16,10 +17,18 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            var lastSaleNumber = await saleRepository.GetCurrentNumber(cancellationToken);
             var sale = mapper.Map<Domain.Entities.Sale>(request);
-            sale.Products.ToList().ForEach(x => x.CalculateDiscount());
+            foreach (var item in sale.Products)
+            {
+                var command = new GetProductCommand { Id = item.ProductId };
+                var response = await mediator.Send(command);
+                item.Description = response.Description;
+                item.CalculateDiscount();
+            }
             sale.UpdateValuesAfterDiscount();
+
+            var lastSaleNumber = await saleRepository.GetCurrentNumber(cancellationToken);
+            sale.SetNumber(lastSaleNumber);
 
             await saleRepository.UpdateAsync(sale, cancellationToken);
             await mediator.Publish(new SaleUpdateEvent(sale.Id, sale.Customer, sale.TotalAmount), cancellationToken);

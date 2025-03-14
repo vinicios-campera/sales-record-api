@@ -25,15 +25,14 @@ public class BaseController : ControllerBase
     //protected IActionResult NotFound(string message = "Resource not found") =>
     //    base.NotFound(new ApiResponse { Detail = message, Success = false });
 
-    //protected IActionResult OkayPaginated<T>(PaginatedList<T> pagedList) =>
-    //        Okay(new PaginatedResponse<T>
-    //        {
-    //            Data = pagedList,
-    //            CurrentPage = pagedList.CurrentPage,
-    //            TotalPages = pagedList.TotalPages,
-    //            TotalItems = pagedList.TotalItems,
-    //            Success = true
-    //        });
+    protected IActionResult OkayPaginated<T>(PaginatedList<T> pagedList) =>
+            Ok(new PaginatedResponse<T>
+            {
+                Data = pagedList,
+                CurrentPage = pagedList.CurrentPage,
+                TotalPages = pagedList.TotalPages,
+                TotalItems = pagedList.TotalItems,
+            });
 
     protected string GetUrl(string resource)
     {

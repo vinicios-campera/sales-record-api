@@ -9,7 +9,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelItemSale
         public Task Handle(SaleItemCanceledEvent notification, CancellationToken cancellationToken)
         {
             //O evento poderá ser publicado num message broken como Kafka, RabbitMq e etc... (não obrigatório)
-            logger.LogInformation("Item {Product} da venda {Id} cancelada", notification.Product, notification.SaleId);
+            logger.LogInformation("Item {ProductId} da venda {Id} cancelada", notification.ProductId, notification.SaleId);
             return Task.CompletedTask;
         }
     }

@@ -6,6 +6,6 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CancelItemSale
     {
         public Guid SaleId { get; set; }
 
-        public string Product { get; set; } = string.Empty;
+        public Guid ProductId { get; set; }
     }
 }
