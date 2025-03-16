@@ -43,7 +43,7 @@ public class CreateSaleHandlerTests
                 .ConvertAll(x => new SaleProduct { ProductId = x.ProductId, Quantity = x.Quantity, Price = x.Price })
         };
 
-        //Callers
+        // Callers
         var result = new CreateSaleResult { Id = sale.Id, };
         _mapper.Map<Sale>(command).Returns(sale);
         _mapper.Map<CreateSaleResult>(sale).Returns(result);

@@ -1,7 +1,7 @@
-﻿using System.Linq.Expressions;
-using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Enums;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.ORM.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -70,7 +70,7 @@ public class ProductRepository(DefaultContext context) : IProductRepository
                 var propertyName = parts[0];
                 var descending = parts.Length > 1 && parts[1].ToLower() == "desc";
 
-                query = ApplyOrdering(query, propertyName, descending, firstOrder);
+                query = query.ApplyOrdering(propertyName, descending, firstOrder);
                 firstOrder = false;
             }
         }
@@ -82,19 +82,5 @@ public class ProductRepository(DefaultContext context) : IProductRepository
     {
         var data = await context.Products.Select(x => x.Category).GroupBy(x => x).Select(x => x.First()).ToListAsync();
         return data;
-    }
-
-    private IQueryable<Product> ApplyOrdering(IQueryable<Product> query, string propertyName, bool descending, bool firstOrder)
-    {
-        var parameter = Expression.Parameter(typeof(Product), "p");
-        var property = Expression.Property(parameter, propertyName);
-        var lambda = Expression.Lambda(property, parameter);
-
-        string methodName = firstOrder ?
-            (descending ? "OrderByDescending" : "OrderBy") :
-            (descending ? "ThenByDescending" : "ThenBy");
-
-        var resultExp = Expression.Call(typeof(Queryable), methodName, new Type[] { typeof(Product), property.Type }, query.Expression, Expression.Quote(lambda));
-        return query.Provider.CreateQuery<Product>(resultExp);
     }
 }

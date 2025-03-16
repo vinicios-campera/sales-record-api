@@ -12,6 +12,7 @@ Esta é uma API desenvolvida em **C# com .NET** para a gestão de pedidos de ven
 - **RESTful API** seguindo boas práticas de arquitetura
 - **Fluent Validation** para validaçao dos modelos de dados
 - **xUnit** para testes unitários
+- **Autenticação JWT** proteger api de pessoas não autorizadas
 
 ## 📌 Instalação e Configuração
 
@@ -33,6 +34,7 @@ Antes de rodar o projeto, certifique-se de ter instalado:
 
    - Procure por **docker-compose**
    - Clique com o botão direito do mouse e vá em **Compose Up**
+   - **Obs:** Se preferir, pode ser feito diretamente pelo terminal: docker-compose up -d
 
 3. **Aplicando as migrations no banco de dados PostgreSQL**
    - Abra o terminal na pasta raíz (pelo Windows ou Visual Studio) e digite:

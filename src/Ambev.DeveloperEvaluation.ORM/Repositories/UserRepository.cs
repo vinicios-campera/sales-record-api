@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.ORM.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -41,7 +42,7 @@ public class UserRepository : IUserRepository
     /// <returns>The user if found, null otherwise</returns>
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Users.FirstOrDefaultAsync(o=> o.Id == id, cancellationToken);
+        return await _context.Users.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
     /// <summary>
@@ -71,5 +72,35 @@ public class UserRepository : IUserRepository
         _context.Users.Remove(user);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<(IEnumerable<User?>, int)> FilterAsync(int page, int size, string? order, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Users.AsQueryable();
+
+        if (!string.IsNullOrEmpty(order))
+        {
+            var orderParams = order.Split(',');
+            bool firstOrder = true;
+
+            foreach (var orderParam in orderParams)
+            {
+                var parts = orderParam.Trim().Split(' ');
+                var propertyName = parts[0];
+                var descending = parts.Length > 1 && parts[1].ToLower() == "desc";
+
+                query = query.ApplyOrdering(propertyName, descending, firstOrder);
+                firstOrder = false;
+            }
+        }
+
+        return (await query.Skip((page - 1) * size).Take(size).ToListAsync(), await query.CountAsync());
+    }
+
+    public async Task<User> UpdateAsync(User user, CancellationToken cancellationToken = default)
+    {
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync(cancellationToken);
+        return user;
     }
 }

@@ -16,7 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
 {
-    //Neste controller, deixei as respostas com ApiResponseWithData, porem acredito que esteja em desacordo com o passado README.md
+    //Neste controller, deixei as respostas com ApiResponseWithData (forma que ja estava no Template),
+    //porem acredito que esteja em desacordo com o passado README.md
 
     [ApiController]
     [Authorize]
@@ -129,7 +130,6 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         {
             var command = new CancelSaleCommand { Id = id };
             var response = await mediator.Send(command, cancellationToken);
-
             return Okay(new ApiResponse
             {
                 Detail = $"Sale {id} changed"
@@ -151,7 +151,6 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         {
             var command = new CancelSaleItemCommand { SaleId = id, ProductId = productId };
             var response = await mediator.Send(command, cancellationToken);
-
             return Okay(new ApiResponse
             {
                 Detail = $"Sale {id} with item {productId} changed"

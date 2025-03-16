@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.ORM.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -50,25 +50,11 @@ public class CartRepository(DefaultContext context) : ICartRepository
                 var propertyName = parts[0];
                 var descending = parts.Length > 1 && parts[1].ToLower() == "desc";
 
-                query = ApplyOrdering(query, propertyName, descending, firstOrder);
+                query = query.ApplyOrdering(propertyName, descending, firstOrder);
                 firstOrder = false;
             }
         }
 
         return (await query.Skip((page - 1) * size).Take(size).Include(x => x.CartProducts).Where(x => x.UserId == userId).ToListAsync(), await query.CountAsync());
-    }
-
-    private IQueryable<Cart> ApplyOrdering(IQueryable<Cart> query, string propertyName, bool descending, bool firstOrder)
-    {
-        var parameter = Expression.Parameter(typeof(Cart), "p");
-        var property = Expression.Property(parameter, propertyName);
-        var lambda = Expression.Lambda(property, parameter);
-
-        string methodName = firstOrder ?
-            (descending ? "OrderByDescending" : "OrderBy") :
-            (descending ? "ThenByDescending" : "ThenBy");
-
-        var resultExp = Expression.Call(typeof(Queryable), methodName, new Type[] { typeof(Cart), property.Type }, query.Expression, Expression.Quote(lambda));
-        return query.Provider.CreateQuery<Cart>(resultExp);
     }
 }

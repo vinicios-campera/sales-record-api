@@ -38,10 +38,10 @@ public class BaseController : ControllerBase
     {
         var uriBuilder = new UriBuilder
         {
-            Scheme = Request.Scheme,
-            Host = Request.Host.Host,
+            Scheme = Request?.Scheme,
+            Host = Request?.Host.Host,
             Path = resource,
-            Port = Request.Host.Port ?? -1
+            Port = Request?.Host.Port ?? -1
         };
         return uriBuilder.ToString();
     }

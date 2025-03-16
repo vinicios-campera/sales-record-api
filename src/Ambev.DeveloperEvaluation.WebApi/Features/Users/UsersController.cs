@@ -1,13 +1,18 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
-using Ambev.DeveloperEvaluation.WebApi.Common;
-using Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
-using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
-using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
+﻿using System.ComponentModel.DataAnnotations;
 using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
-using Ambev.DeveloperEvaluation.Application.Users.GetUser;
 using Ambev.DeveloperEvaluation.Application.Users.DeleteUser;
+using Ambev.DeveloperEvaluation.Application.Users.GetUser;
+using Ambev.DeveloperEvaluation.Application.Users.ListUsers;
+using Ambev.DeveloperEvaluation.Application.Users.UpdateUser;
+using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.CreateUser;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.DeleteUser;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.UpdateUser;
+using AutoMapper;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 
@@ -16,22 +21,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Users;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class UsersController : BaseController
+public class UsersController(IMediator mediator, IMapper mapper) : BaseController
 {
-    private readonly IMediator _mediator;
-    private readonly IMapper _mapper;
-
-    /// <summary>
-    /// Initializes a new instance of UsersController
-    /// </summary>
-    /// <param name="mediator">The mediator instance</param>
-    /// <param name="mapper">The AutoMapper instance</param>
-    public UsersController(IMediator mediator, IMapper mapper)
-    {
-        _mediator = mediator;
-        _mapper = mapper;
-    }
-
     /// <summary>
     /// Creates a new user
     /// </summary>
@@ -49,13 +40,13 @@ public class UsersController : BaseController
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
 
-        var command = _mapper.Map<CreateUserCommand>(request);
-        var response = await _mediator.Send(command, cancellationToken);
+        var command = mapper.Map<CreateUserCommand>(request);
+        var response = await mediator.Send(command, cancellationToken);
 
-        return Created(string.Empty, new ApiResponseWithData<CreateUserResponse>
+        return Created(GetUrl($"/api/users/{response.Id}"), new ApiResponseWithData<CreateUserResponse>
         {
             Detail = "User created successfully",
-            Data = _mapper.Map<CreateUserResponse>(response)
+            Data = mapper.Map<CreateUserResponse>(response)
         });
     }
 
@@ -78,13 +69,54 @@ public class UsersController : BaseController
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
 
-        var command = _mapper.Map<GetUserCommand>(request.Id);
-        var response = await _mediator.Send(command, cancellationToken);
+        var command = mapper.Map<GetUserCommand>(request.Id);
+        var response = await mediator.Send(command, cancellationToken);
 
         return Okay(new ApiResponseWithData<GetUserResponse>
         {
             Detail = "User retrieved successfully",
-            Data = _mapper.Map<GetUserResponse>(response)
+            Data = mapper.Map<GetUserResponse>(response)
+        });
+    }
+
+    /// <summary>
+    /// Obter usuários paginado e ordenado
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(PaginatedResponse<GetUserResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUsers(CommonPaginatedRequest request, CancellationToken cancellationToken)
+    {
+        var command = mapper.Map<GetUsersCommand>(request);
+        var result = await mediator.Send(command, cancellationToken);
+        var items = mapper.Map<List<GetUserResponse>>(result.Items);
+        var response = new PaginatedList<GetUserResponse>(items, result.TotalItems, request.Page, request.Size);
+        return OkayPaginated(response);
+    }
+
+    /// <summary>
+    /// Editar um usuário
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateUserResponse>), StatusCodes.Status202Accepted)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateUser([FromRoute][Required] Guid id, [FromBody] UpdateUserRequest request, CancellationToken cancellationToken)
+    {
+        var command = mapper.Map<UpdateUserCommand>(request);
+        command.Id = id;
+        var response = mapper.Map<UpdateUserResponse>(request);
+        response.Id = await mediator.Send(command, cancellationToken);
+        return Accepted(GetUrl($"/api/users/{response.Id}"), new ApiResponseWithData<UpdateUserResponse>
+        {
+            Detail = "User update successfully",
+            Data = mapper.Map<UpdateUserResponse>(response)
         });
     }
 
@@ -107,9 +139,8 @@ public class UsersController : BaseController
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
 
-        var command = _mapper.Map<DeleteUserCommand>(request.Id);
-        await _mediator.Send(command, cancellationToken);
-
+        var command = mapper.Map<DeleteUserCommand>(request.Id);
+        await mediator.Send(command, cancellationToken);
         return Okay(new ApiResponse
         {
             Detail = "User deleted successfully"
